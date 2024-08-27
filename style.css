@@ -130,7 +130,7 @@ a:visited {
 .btn--delete-workouts {
   background: rgb(248, 98, 98);
   color: #fff;
-  padding: 0.1rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   width: 35%;
   font-family: inherit;
   font-weight: 500;
