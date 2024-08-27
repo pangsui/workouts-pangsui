@@ -8,6 +8,10 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const workOut = document.querySelector('.workout');
+let workout;
+let type;
+let distance;
+let duration;
 
 // parent class
 class Workout {
@@ -117,11 +121,11 @@ class App {
     const allPositive = (...inputs) => inputs.every(inp => inp > 0);
 
     //   get data from the form
-    const type = inputType.value;
-    const distance = +inputDistance.value;
-    const duration = +inputDuration.value;
+    type = inputType.value;
+    distance = +inputDistance.value;
+    duration = +inputDuration.value;
+    // console.log(this.#mapEvent);
     const { lat, lng } = this.#mapEvent.latlng;
-    let workout;
 
     //   if workout running create running
     if (type === 'running') {
@@ -187,6 +191,7 @@ class App {
   #renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
+          <button class="btn--edit-workout"type="button">Edit<butto>
           <button class="btn--delete-workout" type="button">&times;</button>
           <h2 class="workout__title"> ${workout.description}</h2>
           <div class="workout__details">
@@ -240,33 +245,50 @@ class App {
     // console.log(workoutEl.dataset.id);
     if (!workoutEl) return;
 
-    const workout = this.#workouts.find(
-      work => work.id === workoutEl.dataset.id
-    );
+    workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
     //do not set view if delete btn is clicked
-    if (!e.target.classList.contains('btn--delete-workout'))
+    if (!e.target.classList.contains('btn--delete-workout')) {
       this.#map.setView(workout.coords, this.#mapZoom, {
         animate: true,
         pan: {
           duration: 1,
         },
       });
+    }
+    // this.#deleteWorkout(workout);
 
-    this.#deleteWorkout(workout);
+    const btnEdit = document.querySelectorAll('.btn--edit-workout');
+    btnEdit.forEach(btn =>
+      btn.addEventListener('click', this.#editWorkout.bind(this))
+    );
+
+    // delete workout
+    const deleteBtn = document.querySelectorAll('.btn--delete-workout');
+    deleteBtn.forEach(btn =>
+      btn.addEventListener('click', this.#modifyDel.bind(this))
+    );
   }
   // delete workout
-  #deleteWorkout(workout) {
-    const workDel = this.#workouts;
-    const deleteBtn = document.querySelectorAll('.btn--delete-workout');
-    // console.log(workDel);
-    deleteBtn.forEach(btn => {
-      btn.addEventListener('click', function () {
-        location.reload();
-        const workoutIndex = workDel.indexOf(workout);
-        workDel.splice(workoutIndex, 1);
-      });
-      this.#setLocalStorage();
-    });
+  #modifyDel() {
+    location.reload();
+    const workoutIndex = this.#workouts.indexOf(workout);
+    this.#workouts.splice(workoutIndex, 1);
+    this.#setLocalStorage();
+  }
+
+  #editWorkout(mapE) {
+    this.#showForm(mapE);
+    // display form
+    // form.classList.remove('hidden');
+    // form.style.display = 'grid';
+
+    // read values from form
+    // const type = inputType.value;
+
+    // distance = +inputDistance.value;
+    // duration = +inputDuration.value;
+    // replace values read with workout object value
+    console.log(workout);
   }
   #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
