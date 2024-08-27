@@ -131,13 +131,13 @@ a:visited {
   background: rgb(248, 98, 98);
   color: #fff;
   padding: 0.1rem 0.9rem;
-  width: 30%;
+  width: 35%;
   font-family: inherit;
   font-weight: 500;
   font-size: 1.4rem;
   border-radius: 10px;
   position: relative;
-  left: 28rem;
+  left: 27.5rem;
   bottom: 7.5rem;
   cursor: pointer;
   border: none;
