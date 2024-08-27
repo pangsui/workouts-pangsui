@@ -191,7 +191,7 @@ class App {
   #renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <button class="btn--edit-workout"type="button">Edit<butto>
+          <button class="btn--edit-workout" type="button">Edit<button>
           <button class="btn--delete-workout" type="button">&times;</button>
           <h2 class="workout__title"> ${workout.description}</h2>
           <div class="workout__details">

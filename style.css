@@ -121,16 +121,16 @@ a:visited {
   color: var(--color-brand--1);
   position: relative;
   top: -1.5rem;
-  left: 22rem;
+  left: 14rem;
   font-size: 1.8rem;
   font-weight: 500;
-  border: none;
   background: none;
+  border: none;
 }
 .btn--delete-workouts {
   background: rgb(248, 98, 98);
   color: #fff;
-  padding: 0.1rem;
+  padding: 0.1rem 0.9rem;
   width: 30%;
   font-family: inherit;
   font-weight: 500;
