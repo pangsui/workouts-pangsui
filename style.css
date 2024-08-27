@@ -130,15 +130,15 @@ a:visited {
 .btn--delete-workouts {
   background: rgb(248, 98, 98);
   color: #fff;
-  padding: 0.6rem 1rem;
-  width: 40%;
+  padding: 0.1rem;
+  width: 30%;
   font-family: inherit;
-  font-weight: 600;
-  font-size: 1.7rem;
+  font-weight: 500;
+  font-size: 1.4rem;
   border-radius: 10px;
   position: relative;
   left: 28rem;
-  bottom: 8rem;
+  bottom: 7.5rem;
   cursor: pointer;
   border: none;
   /* display: none; */
