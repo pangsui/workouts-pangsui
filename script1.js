@@ -67,7 +67,6 @@ class App {
   #workouts = []; //array holding all running or cycling objects
   #mapZoom = 13;
   #selectedWorkoutIndex = -1;
-  #sort = false;
   constructor() {
     this.#getPosition();
 
@@ -76,13 +75,6 @@ class App {
     inputType.addEventListener('change', this.#toggleElevationField);
     containerWorkouts.addEventListener('click', this.#mapWorkout.bind(this));
     this.#getLocalStorage();
-    const sortBtn = document.querySelectorAll('.btn--sort-workouts');
-    sortBtn.forEach(workoutSort =>
-      workoutSort.addEventListener('click', () => {
-        this.#sortWorkouts(this.#workouts, this.#sort);
-        // this.#sort = !this.#sort;
-      })
-    );
   }
   #getPosition() {
     if (navigator.geolocation)
@@ -136,13 +128,11 @@ class App {
     // console.log(this.#mapEvent);
     let lat, lng;
     if (this.#selectedWorkoutIndex !== -1) {
-      //get lat lng from selected workout
       const selectedWorkout = this.#workouts[this.#selectedWorkoutIndex];
       console.log('###### selected workout ', selectedWorkout);
       lat = selectedWorkout.coords[0];
       lng = selectedWorkout.coords[1];
     } else {
-      //get lat lng from map
       lat = this.#mapEvent.latlng.lat;
       lng = this.#mapEvent.latlng.lng;
     }
@@ -175,11 +165,12 @@ class App {
     if (this.#selectedWorkoutIndex !== -1) {
       this.#workouts[this.#selectedWorkoutIndex] = workout;
     } else {
-      this.#workouts.push(workout); //if not selected for edit push new workout
+      this.#workouts.push(workout);
     }
     // console.log(this.#workouts);
     // display marker
     this.#renderWorkoutMarker(workout);
+
     this.#emptyRenderedList();
     // render workout
     this.#workouts.forEach(workout => this.#renderWorkout(workout));
@@ -299,11 +290,11 @@ class App {
     // delete workout
     const deleteBtn = document.querySelectorAll('.btn--delete-workout');
     deleteBtn.forEach(btn =>
-      btn.addEventListener('click', this.#deleteWorkout.bind(this))
+      btn.addEventListener('click', this.#modifyDel.bind(this))
     );
   }
   // delete workout
-  #deleteWorkout() {
+  #modifyDel() {
     location.reload();
     const workoutIndex = this.#workouts.indexOf(workout);
     this.#workouts.splice(workoutIndex, 1);
@@ -312,11 +303,10 @@ class App {
 
   #fillWorkoutForm(workout) {
     console.log('###### filling workout form');
-    inputDistance.value = workout.distance;
+    document.getElementsByClassName('form__input--distance')[0].value =
+      workout.distance;
     document.getElementsByClassName('form__input--duration')[0].value =
       workout.duration;
-    // document.getElementsByClassName('form__input--cadence')[0].value =
-    //   workout.cadence;
   }
 
   #editWorkout(index) {
@@ -325,24 +315,10 @@ class App {
     // display form
     form.classList.remove('hidden');
     form.style.display = 'grid';
-    const reverseWorkout = this.#workouts.reverse();
-    const workout = reverseWorkout[index];
+
+    const workout = this.#workouts[index];
     console.log(workout);
     this.#fillWorkoutForm(workout);
-  }
-  #sortWorkouts(workoutSort, sort = false) {
-    this.#sort = sort;
-    if (this.#sort) {
-      this.#emptyRenderedList();
-      workoutSort = this.#workouts.slice();
-      workoutSort.sort((a, b) => b.distance - a.distance);
-      console.log('sorted', workoutSort);
-      workoutSort.forEach(wk => this.#renderWorkout(wk));
-      this.#workouts.reverse();
-    } else {
-      this.#workouts.forEach(workout => this.#renderWorkout(workout));
-    }
-    this.#sort = !this.#sort;
   }
   #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
