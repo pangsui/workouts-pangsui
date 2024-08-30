@@ -8,6 +8,11 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const workOut = document.querySelector('.workout');
+const btnDelAll = document.querySelector('.btn--delete-workouts');
+const overlay = document.querySelector('.overlay');
+const overContainer = document.querySelector('.container__overlay');
+const btnConfirm = document.querySelector('.btn__left');
+const btnreject = document.querySelector('.btn__right');
 let workout;
 let type;
 let distance;
@@ -338,11 +343,11 @@ class App {
       workoutSort.sort((a, b) => b.distance - a.distance);
       console.log('sorted', workoutSort);
       workoutSort.forEach(wk => this.#renderWorkout(wk));
-      this.#workouts.reverse();
     } else {
       this.#workouts.forEach(workout => this.#renderWorkout(workout));
     }
     this.#sort = !this.#sort;
+    this.#workouts.reverse();
   }
   #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
@@ -356,10 +361,20 @@ class App {
     });
   }
   reset() {
-    const btnDelAll = document.querySelector('.btn--delete-workouts');
     btnDelAll.addEventListener('click', function () {
-      localStorage.removeItem('workouts');
-      location.reload();
+      // display overlay and container
+      overlay.classList.remove('hidden');
+      overContainer.classList.remove('hidden');
+      // confirm delect request
+      btnConfirm.addEventListener('click', function () {
+        localStorage.removeItem('workouts');
+        location.reload();
+      });
+      // reject delete request
+      btnreject.addEventListener('click', () => {
+        overContainer.classList.add('hidden');
+        overlay.classList.add('hidden');
+      });
     });
   }
 }
