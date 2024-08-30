@@ -243,13 +243,12 @@ a:visited {
 }
 .container__overlay {
   background-color: #fff;
-  /* border: 1px solid #ffb545; */
   box-shadow: 1px 1px 1px lightblue;
   height: 13rem;
   position: absolute;
   left: 50%;
   right: auto;
-  top: 50%;
+  top: 35%;
   padding: 2rem 3rem;
   backdrop-filter: blur(4px);
   z-index: 10000;
