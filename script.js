@@ -337,8 +337,8 @@ class App {
   }
   #sortWorkouts(workoutSort, sort = false) {
     this.#sort = sort;
+    this.#emptyRenderedList();
     if (this.#sort) {
-      this.#emptyRenderedList();
       workoutSort = this.#workouts.slice();
       workoutSort.sort((a, b) => b.distance - a.distance);
       console.log('sorted', workoutSort);
