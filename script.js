@@ -8,6 +8,12 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const workOut = document.querySelector('.workout');
+const btnDelAll = document.querySelector('.btn--delete-workouts');
+const overlay = document.querySelector('.overlay');
+const overContainer = document.querySelector('.container__overlay');
+const btnConfirm = document.querySelector('.btn__left');
+const btnreject = document.querySelector('.btn__right');
+
 let workout;
 let type;
 let distance;
@@ -66,6 +72,8 @@ class App {
   #mapEvent;
   #workouts = []; //array holding all running or cycling objects
   #mapZoom = 13;
+  #selectedWorkoutIndex = -1;
+  #sort = false;
   constructor() {
     this.#getPosition();
 
@@ -74,6 +82,14 @@ class App {
     inputType.addEventListener('change', this.#toggleElevationField);
     containerWorkouts.addEventListener('click', this.#mapWorkout.bind(this));
     this.#getLocalStorage();
+    // sorting workouts
+    const sortBtn = document.querySelectorAll('.btn--sort-workouts');
+    sortBtn.forEach(workoutSort =>
+      workoutSort.addEventListener('click', () => {
+        this.#sortWorkouts(this.#workouts, this.#sort);
+        // this.#sort = !this.#sort;
+      })
+    );
   }
   #getPosition() {
     if (navigator.geolocation)
@@ -125,7 +141,18 @@ class App {
     distance = +inputDistance.value;
     duration = +inputDuration.value;
     // console.log(this.#mapEvent);
-    const { lat, lng } = this.#mapEvent.latlng;
+    let lat, lng;
+    if (this.#selectedWorkoutIndex !== -1) {
+      //get lat lng from selected workout
+      const selectedWorkout = this.#workouts[this.#selectedWorkoutIndex];
+      console.log('###### selected workout ', selectedWorkout);
+      lat = selectedWorkout.coords[0];
+      lng = selectedWorkout.coords[1];
+    } else {
+      //get lat lng from map
+      lat = this.#mapEvent.latlng.lat;
+      lng = this.#mapEvent.latlng.lng;
+    }
 
     //   if workout running create running
     if (type === 'running') {
@@ -152,13 +179,18 @@ class App {
         return alert('input have to be positive');
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
-    this.#workouts.push(workout);
+    if (this.#selectedWorkoutIndex !== -1) {
+      this.#workouts[this.#selectedWorkoutIndex] = workout;
+    } else {
+      this.#workouts.push(workout); //if not selected for edit push new workout
+    }
     // console.log(this.#workouts);
     // display marker
     this.#renderWorkoutMarker(workout);
-
+    this.#emptyRenderedList();
     // render workout
-    this.#renderWorkout(workout);
+    this.#workouts.forEach(workout => this.#renderWorkout(workout));
+
     // clear input fields
     inputDistance.value =
       inputCadence.value =
@@ -169,8 +201,17 @@ class App {
     inputDistance.focus();
     form.style.display = 'none';
     this.#setLocalStorage();
+    this.#selectedWorkoutIndex = -1;
   }
+
+  #emptyRenderedList() {
+    document.querySelectorAll('li.workout').forEach(workoutEl => {
+      workoutEl.remove();
+    });
+  }
+
   #renderWorkoutMarker(workout) {
+    console.log('###### workout ', workout);
     L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
@@ -191,7 +232,7 @@ class App {
   #renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <button class="btn--edit-workout"type="button">Edit<butto>
+          <button class="btn--edit-workout" type="button">Edit</button>
           <button class="btn--delete-workout" type="button">&times;</button>
           <h2 class="workout__title"> ${workout.description}</h2>
           <div class="workout__details">
@@ -237,6 +278,16 @@ class App {
       `;
     }
     form.insertAdjacentHTML('afterend', html);
+    // delete workout
+    const deleteBtn = document.querySelectorAll('.btn--delete-workout');
+    deleteBtn.forEach(btn =>
+      btn.addEventListener('click', this.#deleteWorkout.bind(this))
+    );
+    // edit workout
+    const btnEdit = document.querySelectorAll('.btn--edit-workout');
+    btnEdit.forEach((btn, index) =>
+      btn.addEventListener('click', () => this.#editWorkout(index))
+    );
   }
   #mapWorkout(e) {
     if (!this.#map) return;
@@ -255,40 +306,65 @@ class App {
         },
       });
     }
-    // this.#deleteWorkout(workout);
-
-    const btnEdit = document.querySelectorAll('.btn--edit-workout');
-    btnEdit.forEach(btn =>
-      btn.addEventListener('click', this.#editWorkout.bind(this))
-    );
-
-    // delete workout
-    const deleteBtn = document.querySelectorAll('.btn--delete-workout');
-    deleteBtn.forEach(btn =>
-      btn.addEventListener('click', this.#modifyDel.bind(this))
-    );
   }
   // delete workout
-  #modifyDel() {
-    location.reload();
-    const workoutIndex = this.#workouts.indexOf(workout);
+  #deleteWorkout(e) {
+    const workoutEl = e.target.closest('.workout');
+    // console.log(workoutEl);
+    if (!workoutEl) return;
+    const workoutId = workoutEl.dataset.id;
+    const workoutIndex = this.#workouts.findIndex(workout => workout.id === workoutId);
+
+    if(workoutId === -1) return;
+
     this.#workouts.splice(workoutIndex, 1);
+    workoutEl.remove();
+    location.reload();
     this.#setLocalStorage();
   }
 
-  #editWorkout(mapE) {
-    this.#showForm(mapE);
+  #fillWorkoutForm(workout) {
+    inputDistance.value = workout.distance;
+    inputDuration.value = workout.duration;
+    if (workout.type === 'running') {
+      inputCadence.closest('.form__row').classList.remove('form__row--hidden');
+      inputElevation.closest('.form__row').classList.add('form__row--hidden');
+      inputCadence.value = workout.cadence;
+    } else if (workout.type === 'cycling') {
+      inputCadence.closest('.form__row').classList.add('form__row--hidden');
+      inputElevation.closest('.form__row').classList.remove('form__row--hidden');
+      inputElevation.value = workout.elevationGain;
+    }
+  }
+
+  #editWorkout(index) {
+    
+    this.#selectedWorkoutIndex = index;
     // display form
-    // form.classList.remove('hidden');
-    // form.style.display = 'grid';
-
-    // read values from form
-    // const type = inputType.value;
-
-    // distance = +inputDistance.value;
-    // duration = +inputDuration.value;
-    // replace values read with workout object value
-    console.log(workout);
+    form.classList.remove('hidden');
+    form.style.display = 'grid';
+    const reverseWorkout = this.#workouts.reverse();
+    const workout = reverseWorkout[index];
+    if (workout.type === 'running') {
+      inputType.value = 'running';
+    } else if (workout.type === 'cycling') {
+      inputType.value = 'cycling';
+    }
+    this.#fillWorkoutForm(workout);
+  }
+  #sortWorkouts(workoutSort, sort = false) {
+    this.#sort = sort;
+    this.#emptyRenderedList();
+    if (this.#sort) {
+      workoutSort = this.#workouts.slice();
+      workoutSort.sort((a, b) => b.distance - a.distance);
+      console.log('sorted', workoutSort);
+      workoutSort.forEach(wk => this.#renderWorkout(wk));
+    } else {
+      this.#workouts.forEach(workout => this.#renderWorkout(workout));
+    }
+    this.#sort = !this.#sort;
+    this.#workouts.reverse();
   }
   #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
@@ -302,10 +378,20 @@ class App {
     });
   }
   reset() {
-    const btnDelAll = document.querySelector('.btn--delete-workouts');
     btnDelAll.addEventListener('click', function () {
-      localStorage.removeItem('workouts');
-      location.reload();
+      // display overlay and container
+      overlay.classList.remove('hidden');
+      overContainer.classList.remove('hidden');
+      // confirm delect request
+      btnConfirm.addEventListener('click', function () {
+        localStorage.removeItem('workouts');
+        location.reload();
+      });
+      // reject delete request
+      btnreject.addEventListener('click', () => {
+        overContainer.classList.add('hidden');
+        overlay.classList.add('hidden');
+      });
     });
   }
 }
