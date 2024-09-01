@@ -308,31 +308,49 @@ class App {
     }
   }
   // delete workout
-  #deleteWorkout() {
-    location.reload();
-    const workoutIndex = this.#workouts.indexOf(workout);
+  #deleteWorkout(e) {
+    const workoutEl = e.target.closest('.workout');
+    // console.log(workoutEl);
+    if (!workoutEl) return;
+    const workoutId = workoutEl.dataset.id;
+    const workoutIndex = this.#workouts.findIndex(workout => workout.id === workoutId);
+
+    if(workoutId === -1) return;
+    
     this.#workouts.splice(workoutIndex, 1);
+    workoutEl.remove();
+    location.reload();
     this.#setLocalStorage();
   }
 
   #fillWorkoutForm(workout) {
-    console.log('###### filling workout form');
     inputDistance.value = workout.distance;
-    document.getElementsByClassName('form__input--duration')[0].value =
-      workout.duration;
-    // document.getElementsByClassName('form__input--cadence')[0].value =
-    //   workout.cadence;
+    inputDuration.value = workout.duration;
+    if (workout.type === 'running') {
+      inputCadence.closest('.form__row').classList.remove('form__row--hidden');
+      inputElevation.closest('.form__row').classList.add('form__row--hidden');
+      inputCadence.value = workout.cadence;
+    } else if (workout.type === 'cycling') {
+      inputCadence.closest('.form__row').classList.add('form__row--hidden');
+      inputElevation.closest('.form__row').classList.remove('form__row--hidden');
+      inputElevation.value = workout.elevationGain;
+    }
   }
 
   #editWorkout(index) {
-    console.log('##### index ', index);
+    
     this.#selectedWorkoutIndex = index;
     // display form
     form.classList.remove('hidden');
     form.style.display = 'grid';
     const reverseWorkout = this.#workouts.reverse();
     const workout = reverseWorkout[index];
-    console.log(workout);
+    if (workout.type === 'running') {
+      inputType.value = 'running';
+    } else if (workout.type === 'cycling') {
+      inputType.value = 'cycling';
+    }
+
     this.#fillWorkoutForm(workout);
   }
   #sortWorkouts(workoutSort, sort = false) {
