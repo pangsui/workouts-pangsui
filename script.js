@@ -211,7 +211,6 @@ class App {
   }
 
   #renderWorkoutMarker(workout) {
-    console.log('###### workout ', workout);
     L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
@@ -279,10 +278,8 @@ class App {
     }
     form.insertAdjacentHTML('afterend', html);
     // delete workout
-    const deleteBtn = document.querySelectorAll('.btn--delete-workout');
-    deleteBtn.forEach(btn =>
-      btn.addEventListener('click', this.#deleteWorkout.bind(this))
-    );
+    const deleteBtn = document.querySelector('.btn--delete-workout');
+    deleteBtn.addEventListener('click', this.#deleteWorkout.bind(this));
     // edit workout
     const btnEdit = document.querySelectorAll('.btn--edit-workout');
     btnEdit.forEach((btn, index) =>
@@ -308,11 +305,16 @@ class App {
     }
   }
   // delete workout
-  #deleteWorkout() {
-    location.reload();
-    const workoutIndex = this.#workouts.indexOf(workout);
-    this.#workouts.splice(workoutIndex, 1);
+  #deleteWorkout(e) {
+    const workoutTargetId = e.target.closest('.workout').dataset.id;
+    const workoutSearchId = this.#workouts.findIndex(
+      workout => workout.id === workoutTargetId
+    );
+    console.log(workoutSearchId);
+    if (workoutSearchId === -1) return;
+    this.#workouts.splice(workoutSearchId, 1);
     this.#setLocalStorage();
+    location.reload();
   }
 
   #fillWorkoutForm(workout) {
