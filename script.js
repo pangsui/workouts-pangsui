@@ -13,7 +13,6 @@ const overlay = document.querySelector('.overlay');
 const overContainer = document.querySelector('.container__overlay');
 const btnConfirm = document.querySelector('.btn__left');
 const btnreject = document.querySelector('.btn__right');
-const sortBtn = document.querySelectorAll('.btn--sort-workouts');
 
 let workout;
 let type;
@@ -83,6 +82,14 @@ class App {
     inputType.addEventListener('change', this.#toggleElevationField);
     containerWorkouts.addEventListener('click', this.#mapWorkout.bind(this));
     this.#getLocalStorage();
+    // sorting workouts
+    const sortBtn = document.querySelectorAll('.btn--sort-workouts');
+    sortBtn.forEach(workoutSort =>
+      workoutSort.addEventListener('click', () => {
+        this.#sortWorkouts(this.#workouts, this.#sort);
+        // this.#sort = !this.#sort;
+      })
+    );
   }
   #getPosition() {
     if (navigator.geolocation)
@@ -280,12 +287,6 @@ class App {
     const btnEdit = document.querySelectorAll('.btn--edit-workout');
     btnEdit.forEach((btn, index) =>
       btn.addEventListener('click', () => this.#editWorkout(index))
-    );
-    sortBtn.forEach(workoutSort =>
-      workoutSort.addEventListener('click', () => {
-        this.#sortWorkouts(this.#workouts, this.#sort);
-        // this.#sort = !this.#sort;
-      })
     );
   }
   #mapWorkout(e) {
