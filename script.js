@@ -316,7 +316,7 @@ class App {
     const workoutIndex = this.#workouts.findIndex(workout => workout.id === workoutId);
 
     if(workoutId === -1) return;
-
+    
     this.#workouts.splice(workoutIndex, 1);
     workoutEl.remove();
     location.reload();
@@ -350,6 +350,7 @@ class App {
     } else if (workout.type === 'cycling') {
       inputType.value = 'cycling';
     }
+
     this.#fillWorkoutForm(workout);
   }
   #sortWorkouts(workoutSort, sort = false) {
