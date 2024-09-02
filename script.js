@@ -283,7 +283,7 @@ class App {
     // edit workout
     const btnEdit = document.querySelectorAll('.btn--edit-workout');
     btnEdit.forEach((btn, index) =>
-      btn.addEventListener('click', () => this.#editWorkout(index))
+      btn.addEventListener('click', e => this.#editWorkout(e, index))
     );
   }
   #mapWorkout(e) {
@@ -310,7 +310,6 @@ class App {
     const workoutSearchId = this.#workouts.findIndex(
       workout => workout.id === workoutTargetId
     );
-    console.log(workoutSearchId);
     if (workoutSearchId === -1) return;
     this.#workouts.splice(workoutSearchId, 1);
     this.#setLocalStorage();
@@ -322,20 +321,39 @@ class App {
     inputDistance.value = workout.distance;
     document.getElementsByClassName('form__input--duration')[0].value =
       workout.duration;
+    if (workout.type === 'running') {
+      inputElevation.closest('.form__row').classList.add('form__row--hidden');
+      inputCadence.closest('.form__row').classList.remove('form__row--hidden');
+      inputCadence.value = workout.cadence;
+    }
+    if (workout.type === 'cycling') {
+      inputElevation
+        .closest('.form__row')
+        .classList.remove('form__row--hidden');
+      inputCadence.closest('.form__row').classList.add('form__row--hidden');
+      inputElevation.value = workout.elevationGain;
+    }
     // document.getElementsByClassName('form__input--cadence')[0].value =
     //   workout.cadence;
   }
 
-  #editWorkout(index) {
-    console.log('##### index ', index);
-    this.#selectedWorkoutIndex = index;
+  #editWorkout(e, index) {
     // display form
+    this.#selectedWorkoutIndex = index;
     form.classList.remove('hidden');
     form.style.display = 'grid';
-    const reverseWorkout = this.#workouts.reverse();
-    const workout = reverseWorkout[index];
-    console.log(workout);
-    this.#fillWorkoutForm(workout);
+    const targetworkoutID = e.target.closest('.workout').dataset.id;
+    const searchedWorkout = this.#workouts.find(
+      workout => workout.id === targetworkoutID
+    );
+    this.#selectedWorkoutIndex = this.#workouts.findIndex(
+      workout => workout.id === targetworkoutID
+    );
+    if (this.#selectedWorkoutIndex === -1 || searchedWorkout === null) return;
+
+    index = this.#selectedWorkoutIndex;
+    console.log('index', index, this.#selectedWorkoutIndex);
+    this.#fillWorkoutForm(searchedWorkout);
   }
   #sortWorkouts(workoutSort, sort = false) {
     this.#sort = sort;
@@ -343,13 +361,11 @@ class App {
     if (this.#sort) {
       workoutSort = this.#workouts.slice();
       workoutSort.sort((a, b) => b.distance - a.distance);
-      console.log('sorted', workoutSort);
       workoutSort.forEach(wk => this.#renderWorkout(wk));
     } else {
       this.#workouts.forEach(workout => this.#renderWorkout(workout));
     }
     this.#sort = !this.#sort;
-    this.#workouts.reverse();
   }
   #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
