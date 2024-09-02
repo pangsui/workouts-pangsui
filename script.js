@@ -321,6 +321,7 @@ class App {
     inputDistance.value = workout.distance;
     document.getElementsByClassName('form__input--duration')[0].value =
       workout.duration;
+    console.log('type *****', typeof +inputDuration.value);
     if (workout.type === 'running') {
       inputElevation.closest('.form__row').classList.add('form__row--hidden');
       inputCadence.closest('.form__row').classList.remove('form__row--hidden');
@@ -349,11 +350,10 @@ class App {
     this.#selectedWorkoutIndex = this.#workouts.findIndex(
       workout => workout.id === targetworkoutID
     );
-    if (this.#selectedWorkoutIndex === -1 || searchedWorkout === null) return;
-
+    // if (this.#selectedWorkoutIndex === -1 || searchedWorkout === null) return;
     index = this.#selectedWorkoutIndex;
     console.log('index', index, this.#selectedWorkoutIndex);
-    this.#fillWorkoutForm(searchedWorkout);
+    // this.#fillWorkoutForm(searchedWorkout);
   }
   #sortWorkouts(workoutSort, sort = false) {
     this.#sort = sort;
